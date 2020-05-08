@@ -1,0 +1,21 @@
+[package]
+name = "spaniel_id"
+version = "0.1.0"
+authors = ["Robin KAY <komadori@gekkou.co.uk>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Spaniel Interactive Deserialiser for Serde"
+readme = "README.md"
+keywords = ["serde", "interactive", "console", "terminal"]
+
+[features]
+default = ["stdio", "rustyline", "u8i8_variants"]
+stdio = []
+u8i8_variants = []
+
+[dependencies]
+serde = "1.0"
+rustyline = { version = "6.1", optional = true}
+
+[dev-dependencies]
+serde = { version = "1.0", features = ["derive"] }
