@@ -1,9 +1,19 @@
 use spaniel_id::prompt::*;
 use spaniel_id::{Error, Result};
 use std::iter::ExactSizeIterator;
+use std::mem;
+
+#[derive(Debug, PartialEq)]
+pub enum LogEntry {
+  BeginScope(String, Option<usize>),
+  EndScope,
+  Response(RequestKind, String, &'static [&'static str], String),
+  Report(ReportKind, String),
+}
 
 pub struct MockPrompt<I: ExactSizeIterator<Item = &'static str>> {
   responses: I,
+  log: Vec<LogEntry>,
   interactive: bool,
   level: usize,
 }
@@ -12,6 +22,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> MockPrompt<I> {
   pub fn new(responses: I) -> MockPrompt<I> {
     MockPrompt {
       responses,
+      log: Vec::new(),
       interactive: false,
       level: 0,
     }
@@ -20,6 +31,10 @@ impl<I: ExactSizeIterator<Item = &'static str>> MockPrompt<I> {
   pub fn with_interactive(mut self) -> Self {
     self.interactive = true;
     self
+  }
+
+  pub fn into_log(mut self) -> Vec<LogEntry> {
+    mem::replace(&mut self.log, Vec::new())
   }
 }
 
@@ -35,6 +50,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptResponder
 {
   fn begin_scope(&mut self, name: &str, size: Option<usize>) -> Result<()> {
     self.level += 1;
+    self.log.push(LogEntry::BeginScope(name.to_string(), size));
     println!(
       "begin_scope({:?}, {:?}) enters level {:?}",
       name, size, self.level
@@ -45,6 +61,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptResponder
   fn end_scope(&mut self) -> Result<()> {
     println!("end_scope() exits level {:?}", self.level);
     self.level -= 1;
+    self.log.push(LogEntry::EndScope);
     Ok(())
   }
 
@@ -55,6 +72,12 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptResponder
     response: &str,
   ) -> Result<()> {
     println!("response({:?}, {:?}, {:?})", kind, prompt, response);
+    self.log.push(LogEntry::Response(
+      kind,
+      prompt.to_string(),
+      &[],
+      response.to_string(),
+    ));
     Ok(())
   }
 }
@@ -70,7 +93,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptRequester
     &mut self,
     kind: RequestKind,
     prompt: &str,
-    variants: &[&str],
+    variants: &'static [&'static str],
   ) -> Result<String> {
     match self.responses.next() {
       Some(s) => {
@@ -78,6 +101,12 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptRequester
           "request({:?}, {:?}, {:?}) returns {:?}",
           kind, prompt, variants, s
         );
+        self.log.push(LogEntry::Response(
+          kind,
+          prompt.to_string(),
+          variants,
+          s.to_string(),
+        ));
         Ok(s.to_string())
       }
       None => {
@@ -89,6 +118,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptRequester
 
   fn report(&mut self, kind: ReportKind, msg: &str) -> Result<()> {
     println!("report({:?}, {:?})", kind, msg);
+    self.log.push(LogEntry::Report(kind, msg.to_string()));
     Ok(())
   }
 }

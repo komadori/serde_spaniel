@@ -1,4 +1,3 @@
-use serde::de;
 use serde::Deserialize;
 use spaniel_id::*;
 use std::collections::HashMap;

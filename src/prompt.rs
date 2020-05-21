@@ -356,13 +356,13 @@ impl<P> CompactPrompt<P> {
 impl<P: PromptResponder> PromptResponder for CompactPrompt<P> {
   fn begin_scope(&mut self, name: &str, size: Option<usize>) -> Result<()> {
     let compact = size == Some(1);
+    if !compact {
+      self.inner.begin_scope(&self.compound_name(name), size)?;
+    }
     self.scopes.push(CompactScope {
       name: name.to_string(),
       compact,
     });
-    if !compact {
-      self.inner.begin_scope(&self.compound_name(name), size)?;
-    }
     Ok(())
   }
 

@@ -1,2 +1,2 @@
 pub mod mock;
-pub use mock::MockPrompt;
+pub use mock::{LogEntry, MockPrompt};
