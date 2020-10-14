@@ -2,8 +2,7 @@ use serde::Deserialize;
 use spaniel_id::prompt::{CompactPrompt, RequestKind};
 use spaniel_id::*;
 
-mod util;
-use crate::util::{LogEntry, MockPrompt};
+use super::mock::{LogEntry, MockPrompt};
 
 #[test]
 fn compact_request() {

@@ -2,8 +2,7 @@ use serde::Deserialize;
 use spaniel_id::*;
 use std::collections::HashMap;
 
-mod util;
-use crate::util::MockPrompt;
+use super::mock::MockPrompt;
 
 #[test]
 fn struct_of_prims() {
