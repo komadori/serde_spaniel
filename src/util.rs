@@ -95,7 +95,7 @@ pub fn from_prompt<'de, T: Deserialize<'de>, P: PromptRequester>(
 pub fn from_console<'de, T: Deserialize<'de>>() -> Result<T> {
   #[cfg(feature = "rustyline")]
   {
-    from_prompt(crate::rustyline::RustyLinePrompt::new_editor())
+    from_prompt(crate::rustyline::RustyLinePrompt::new())
   }
 
   #[cfg(all(not(feature = "rustyline"), feature = "stdio"))]

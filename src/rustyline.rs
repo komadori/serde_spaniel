@@ -90,8 +90,24 @@ pub struct RustyLinePrompt<T: BorrowMut<Editor<H>>, H: SpanielHelper> {
   was_autohistory: bool,
 }
 
+impl RustyLinePrompt<Editor<SimpleHelper>, SimpleHelper> {
+  /// Constructs a new `RustyLinePrompt` which owns a stock editor.
+  pub fn new() -> Self {
+    let mut editor = Editor::new();
+    editor.set_helper(Some(SimpleHelper::new()));
+    Self::with_editor(editor)
+  }
+}
+
+impl Default for RustyLinePrompt<Editor<SimpleHelper>, SimpleHelper> {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl<T: BorrowMut<Editor<H>>, H: SpanielHelper> RustyLinePrompt<T, H> {
-  pub fn new(mut editor: T) -> Self {
+  /// Constructs a new `RustyLinePrompt` with the editor `T`.
+  pub fn with_editor(mut editor: T) -> Self {
     let ed_ref = editor.borrow_mut();
     let was_autohistory = ed_ref.config_mut().auto_add_history();
     ed_ref.set_auto_add_history(true);
@@ -105,14 +121,6 @@ impl<T: BorrowMut<Editor<H>>, H: SpanielHelper> RustyLinePrompt<T, H> {
 
   fn spaces(&self) -> usize {
     2 * self.level
-  }
-}
-
-impl RustyLinePrompt<Editor<SimpleHelper>, SimpleHelper> {
-  pub fn new_editor() -> Self {
-    let mut editor = Editor::new();
-    editor.set_helper(Some(SimpleHelper::new()));
-    Self::new(editor)
   }
 }
 
