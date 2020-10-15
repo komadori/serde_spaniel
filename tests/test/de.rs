@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use spaniel_id::*;
+use serde_spaniel::*;
 use std::collections::HashMap;
 
 use super::mock::MockPrompt;

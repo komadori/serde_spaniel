@@ -1,5 +1,5 @@
-use spaniel_id::prompt::*;
-use spaniel_id::{Error, Result};
+use serde_spaniel::prompt::*;
+use serde_spaniel::{Error, Result};
 use std::iter::ExactSizeIterator;
 use std::mem;
 

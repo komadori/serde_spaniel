@@ -1,6 +1,6 @@
 use serde::Deserialize;
-use spaniel_id::prompt::{CompactPrompt, RequestKind};
-use spaniel_id::*;
+use serde_spaniel::prompt::{CompactPrompt, RequestKind};
+use serde_spaniel::*;
 
 use super::mock::{LogEntry, MockPrompt};
 

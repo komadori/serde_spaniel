@@ -1,5 +1,5 @@
 [package]
-name = "spaniel_id"
+name = "serde_spaniel"
 version = "0.1.0"
 authors = ["Robin KAY <komadori@gekkou.co.uk>"]
 edition = "2018"
