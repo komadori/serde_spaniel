@@ -195,7 +195,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
     let mut buf = Vec::<u8>::new();
     while self.ask_yes_no("Add byte?")? {
       loop {
-        let s = self.request(stringify!($tname), &[])?;
+        let s = self.request("u8", u8i8::U8_VARIANTS)?;
         match u8::from_str(&s) {
           Ok(v) => {
             buf.push(v);
