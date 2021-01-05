@@ -1,10 +1,11 @@
 use crate::de::Deserializer;
 use crate::error::{Error, Result, UserAction};
 use crate::prompt::{
-  CompactPrompt, MetaCommandPrompt, PromptRequester, ReplayPrompt, ReportKind,
-  RequestKind,
+  CompactPrompt, MetaCommandPrompt, PromptRequester, PromptResponder,
+  ReplayPrompt, ReportKind, RequestKind,
 };
-use serde::Deserialize;
+use crate::ser::Serializer;
+use serde::{Deserialize, Serialize};
 
 /// Deserialise a value of type `T` from a prompt using the bare deserialiser.
 pub fn from_bare_prompt<'de, T: Deserialize<'de>, P: PromptRequester>(
@@ -107,4 +108,12 @@ pub fn from_console<'de, T: Deserialize<'de>>() -> Result<T> {
   {
     Err(Error::IOError("No console support!"))
   }
+}
+
+/// Serialise an instance of type `T` to a prompt.
+pub fn to_prompt<T: Serialize, P: PromptResponder>(
+  value: &T,
+  prompt: P,
+) -> Result<()> {
+  Serialize::serialize(value, &mut Serializer::from_prompt(prompt))
 }

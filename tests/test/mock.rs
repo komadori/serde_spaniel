@@ -36,6 +36,17 @@ impl<I: ExactSizeIterator<Item = &'static str>> MockPrompt<I> {
   pub fn into_log(mut self) -> Vec<LogEntry> {
     mem::replace(&mut self.log, Vec::new())
   }
+
+  pub fn responses(&self) -> Vec<String> {
+    let mut rs = Vec::new();
+    for entry in self.log.iter() {
+      match entry {
+        LogEntry::Response(_, _, _, str) => rs.push(str.clone()),
+        _ => {}
+      }
+    }
+    rs
+  }
 }
 
 impl<I: ExactSizeIterator<Item = &'static str>> Drop for MockPrompt<I> {
