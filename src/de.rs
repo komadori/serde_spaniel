@@ -243,9 +243,9 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
   where
     V: Visitor<'de>,
   {
-    self.begin_scope(name, Some(1), ScopeLimit::Implicit)?;
+    self.begin_scope(name, Some(1), ScopeLimit::Explicit)?;
     self.respond("unit", "()")?;
-    self.end_implicit_scopes()?;
+    self.end_scope()?;
     visitor.visit_unit()
   }
 
