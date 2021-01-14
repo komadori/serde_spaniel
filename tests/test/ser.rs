@@ -1,28 +1,45 @@
 use serde::Serialize;
-use serde_spaniel::prompt::RequestKind;
 use serde_spaniel::*;
 use std::iter::empty;
 
+use super::golden::{self, Golden};
 use super::mock::MockPrompt;
+
+fn test_ser<G: Golden>()
+where
+  G::V: Serialize,
+{
+  let mut mock = MockPrompt::new(empty());
+  to_prompt(&G::value(), &mut mock).unwrap();
+  assert_eq!(mock.responses(), G::responses(true))
+}
+
+#[test]
+fn struct_of_prims() {
+  test_ser::<golden::StructOfPrimsCase>()
+}
 
 #[test]
 fn struct_of_seqs() {
-  #[derive(Debug, Serialize, PartialEq)]
-  struct StructOfSeqs {
-    ints: Vec<u32>,
-    option_units: Vec<Option<()>>,
-  }
-  let value = StructOfSeqs {
-    ints: vec![60, 3600],
-    option_units: vec![None, Some(()), None],
-  };
-  let mut mock = MockPrompt::new(empty());
-  to_prompt(&value, &mut mock).unwrap();
-  assert_eq!(
-    mock.responses(),
-    vec![
-      "yes", "60", "yes", "3600", "no", "yes", "no", "yes", "yes", "()", "yes",
-      "no", "no"
-    ]
-  );
+  test_ser::<golden::StructOfSeqsCase>()
+}
+
+#[test]
+fn tuple_of_options() {
+  test_ser::<golden::TupleOfOptionsCase>()
+}
+
+#[test]
+fn tuple_of_units() {
+  test_ser::<golden::TupleOfUnitsCase>()
+}
+
+#[test]
+fn seq_of_seqs() {
+  test_ser::<golden::SeqOfSeqsCase>()
+}
+
+#[test]
+fn map_of_enums_and_newtypes() {
+  test_ser::<golden::MapOfEnumsAndNewtypesCase>()
 }

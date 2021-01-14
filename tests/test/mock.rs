@@ -41,6 +41,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> MockPrompt<I> {
     let mut rs = Vec::new();
     for entry in self.log.iter() {
       match entry {
+        LogEntry::Response(RequestKind::Synthetic, _, _, _) => {}
         LogEntry::Response(_, _, _, str) => rs.push(str.clone()),
         _ => {}
       }
