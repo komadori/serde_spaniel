@@ -168,6 +168,7 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
   }
 
   fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
+    self.begin_scope("map", None, ScopeLimit::Explicit)?;
     Ok(Map::new(self))
   }
 
