@@ -50,7 +50,7 @@ pub fn from_bare_prompt_confirm<
   }
 }
 
-/// Deserialise a value of type `T` from a prompt plus support for undos and
+/// Deserialise a value of type `T` from a prompt while handling undos and
 /// restarts.
 pub fn from_replay_prompt<'de, T: Deserialize<'de>, P: PromptRequester>(
   prompt: P,
@@ -84,8 +84,8 @@ pub fn from_replay_prompt<'de, T: Deserialize<'de>, P: PromptRequester>(
   }
 }
 
-/// Deserialise a value of type `T` from a prompt plus support for undos,
-/// restarts, meta-commands, and compacting.
+/// Deserialise a value of type `T` from a prompt while handling undos,
+/// restarts, meta-commands, and scope compacting.
 pub fn from_prompt<'de, T: Deserialize<'de>, P: PromptRequester>(
   prompt: P,
 ) -> Result<T> {
@@ -110,10 +110,19 @@ pub fn from_console<'de, T: Deserialize<'de>>() -> Result<T> {
   }
 }
 
-/// Serialise an instance of type `T` to a prompt.
-pub fn to_prompt<T: Serialize, P: PromptResponder>(
+/// Serialise an instance of type `T` to a prompt using the bare serialiser.
+pub fn to_bare_prompt<T: Serialize, P: PromptResponder>(
   value: &T,
   prompt: P,
 ) -> Result<()> {
   Serialize::serialize(value, &mut Serializer::from_prompt(prompt))
+}
+
+/// Serialise an instance of type `T` to a prompt while handling meta-commands
+/// and scope compacting.
+pub fn to_prompt<T: Serialize, P: PromptResponder>(
+  value: &T,
+  prompt: P,
+) -> Result<()> {
+  to_bare_prompt(value, MetaCommandPrompt::new(CompactPrompt::new(prompt)))
 }

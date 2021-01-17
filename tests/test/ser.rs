@@ -10,7 +10,7 @@ where
   G::V: Serialize,
 {
   let mut mock = MockPrompt::new(empty());
-  to_prompt(&G::value(), &mut mock).unwrap();
+  to_bare_prompt(&G::value(), &mut mock).unwrap();
   assert_eq!(mock.responses(), G::responses(true))
 }
 

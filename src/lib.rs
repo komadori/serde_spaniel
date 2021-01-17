@@ -25,5 +25,5 @@ pub mod stdio;
 pub use error::{Error, Result, UserAction};
 pub use util::{
   from_bare_prompt, from_bare_prompt_confirm, from_console, from_prompt,
-  from_replay_prompt, to_prompt,
+  from_replay_prompt, to_bare_prompt, to_prompt,
 };
