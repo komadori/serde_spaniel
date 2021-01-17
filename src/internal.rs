@@ -145,3 +145,25 @@ macro_rules! internal_prompt_responder_mixin {
     }
   };
 }
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! internal_prompt_requester_mixin {
+  ($vname:ident) => {
+    $crate::internal_prompt_responder_mixin!($vname);
+    fn is_interactive(&self) -> bool {
+      self.$vname.is_interactive()
+    }
+    fn request(
+      &mut self,
+      kind: RequestKind,
+      prompt: &str,
+      variants: &'static [&'static str],
+    ) -> Result<String> {
+      self.$vname.request(kind, prompt, variants)
+    }
+    fn report(&mut self, kind: ReportKind, msg: &str) -> Result<()> {
+      self.$vname.report(kind, msg)
+    }
+  };
+}

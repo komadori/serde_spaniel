@@ -6,108 +6,38 @@ use serde::de::{
 };
 
 use crate::error::{Error, Result};
-use crate::prompt::{PromptRequester, ReportKind, RequestKind};
+use crate::internal::{InternalPrompt, ScopeLimit};
+use crate::internal_prompt_requester_mixin;
+use crate::prompt::{
+  PromptRequester, PromptResponder, ReportKind, RequestKind,
+};
 use crate::u8i8;
 use crate::util;
 
-#[derive(PartialEq, Eq)]
-enum ScopeLimit {
-  Explicit,
-  Implicit,
-}
-
-struct ScopeEntry(ScopeLimit, u32);
-
 pub struct Deserializer<P: PromptRequester> {
-  prompt: P,
-  scopes: Vec<ScopeEntry>,
+  prompt: InternalPrompt<P>,
 }
 
 impl<P: PromptRequester> Deserializer<P> {
   pub fn from_prompt(prompt: P) -> Self {
     Deserializer {
-      prompt,
-      scopes: Vec::new(),
+      prompt: InternalPrompt::from_prompt(prompt),
     }
   }
 
   pub fn cleanup(&mut self) -> Result<()> {
-    while let Some(ScopeEntry(_, n)) = self.scopes.last_mut() {
-      *n -= 1;
-      if *n == 0 {
-        self.scopes.pop();
-      }
-      self.prompt.end_scope()?;
-    }
-    Ok(())
-  }
-
-  fn begin_scope(
-    &mut self,
-    name: &str,
-    size: Option<usize>,
-    limit: ScopeLimit,
-  ) -> Result<()> {
-    self.prompt.begin_scope(name, size)?;
-    match self.scopes.last_mut() {
-      Some(ScopeEntry(lim, n)) if limit == *lim => *n += 1,
-      _ => self.scopes.push(ScopeEntry(limit, 1)),
-    }
-    Ok(())
-  }
-
-  fn end_scope(&mut self) -> Result<()> {
-    self.prompt.end_scope()?;
-    match self.scopes.last_mut() {
-      Some(ScopeEntry(ScopeLimit::Explicit, n)) => {
-        *n -= 1;
-        if *n == 0 {
-          self.scopes.pop();
-        }
-      }
-      _ => unreachable!(),
-    };
-    self.end_implicit_scopes()?;
-    Ok(())
-  }
-
-  fn end_implicit_scopes(&mut self) -> Result<()> {
-    while let Some(ScopeEntry(ScopeLimit::Implicit, n)) = self.scopes.last_mut()
-    {
-      *n -= 1;
-      if *n == 0 {
-        self.scopes.pop();
-      }
-      self.prompt.end_scope()?;
-    }
-    Ok(())
-  }
-
-  fn is_interactive(&self) -> bool {
-    self.prompt.is_interactive()
-  }
-
-  fn request(
-    &mut self,
-    prompt: &str,
-    variants: &'static [&'static str],
-  ) -> Result<String> {
-    self.prompt.request(RequestKind::Datum, prompt, variants)
-  }
-
-  fn respond(&mut self, prompt: &str, response: &str) -> Result<()> {
-    self
-      .prompt
-      .respond(RequestKind::Synthetic, prompt, response)
+    self.prompt.cleanup()
   }
 
   fn report_bad_response(&mut self, msg: &str) -> Result<()> {
-    self.prompt.report(ReportKind::BadResponse, msg)
+    self.report(ReportKind::BadResponse, msg)
   }
 
   fn ask_yes_no(&mut self, prompt: &str) -> Result<bool> {
     util::ask_yes_no(&mut self.prompt, prompt)
   }
+
+  internal_prompt_requester_mixin!(prompt);
 }
 
 macro_rules! deserialize_from_str {
@@ -120,7 +50,8 @@ macro_rules! deserialize_from_str {
       V: de::Visitor<'de>,
     {
       loop {
-        let s = self.request(stringify!($tname), &$variants)?;
+        let s =
+          self.request(RequestKind::Datum, stringify!($tname), &$variants)?;
         match $tname::from_str(&s) {
           Ok(v) => {
             self.end_implicit_scopes()?;
@@ -176,7 +107,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
   where
     V: Visitor<'de>,
   {
-    let s = self.request("string", &[])?;
+    let s = self.request(RequestKind::Datum, "string", &[])?;
     self.end_implicit_scopes()?;
     visitor.visit_string(s)
   }
@@ -195,7 +126,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
     let mut buf = Vec::<u8>::new();
     while self.ask_yes_no("Add byte?")? {
       loop {
-        let s = self.request("u8", u8i8::U8_VARIANTS)?;
+        let s = self.request(RequestKind::Datum, "u8", u8i8::U8_VARIANTS)?;
         match u8::from_str(&s) {
           Ok(v) => {
             buf.push(v);
@@ -230,7 +161,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
   where
     V: Visitor<'de>,
   {
-    self.respond("unit", "()")?;
+    self.respond(RequestKind::Synthetic, "unit", "()")?;
     self.end_implicit_scopes()?;
     visitor.visit_unit()
   }
@@ -244,7 +175,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
     V: Visitor<'de>,
   {
     self.begin_scope(name, Some(1), ScopeLimit::Explicit)?;
-    self.respond("unit", "()")?;
+    self.respond(RequestKind::Synthetic, "unit", "()")?;
     self.end_scope()?;
     visitor.visit_unit()
   }
@@ -340,7 +271,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
   where
     V: Visitor<'de>,
   {
-    let s = self.request("identifier", &[])?;
+    let s = self.request(RequestKind::Datum, "identifier", &[])?;
     self.end_implicit_scopes()?;
     visitor.visit_string(s)
   }
@@ -349,7 +280,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
   where
     V: Visitor<'de>,
   {
-    self.respond("any", "IGNORED")?;
+    self.respond(RequestKind::Synthetic, "any", "IGNORED")?;
     self.end_implicit_scopes()?;
     visitor.visit_unit()
   }
@@ -385,12 +316,14 @@ impl<'de: 'a, 'a, P: PromptRequester> EnumAccess<'de> for Enum<'a, P> {
   {
     if self.variants.len() == 1 {
       let v = self.variants[0];
-      self.de.respond("variant", v)?;
+      self.de.respond(RequestKind::Synthetic, "variant", v)?;
       let val = seed.deserialize(v.into_deserializer())?;
       return Ok((val, EnumVariant::new(self.de, v)));
     }
     loop {
-      let s = self.de.request("variant", self.variants)?;
+      let s = self
+        .de
+        .request(RequestKind::Datum, "variant", self.variants)?;
       match self.variants.iter().find(|v| **v == s) {
         Some(v) => {
           let val = seed.deserialize(v.into_deserializer())?;
