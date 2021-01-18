@@ -79,7 +79,9 @@ impl Completer for SimpleHelper {
 
 impl Validator for SimpleHelper {}
 impl Highlighter for SimpleHelper {}
-impl Hinter for SimpleHelper {}
+impl Hinter for SimpleHelper {
+  type Hint = String;
+}
 impl Helper for SimpleHelper {}
 
 /// Prompt based on RustyLine
