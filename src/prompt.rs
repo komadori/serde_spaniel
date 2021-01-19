@@ -23,8 +23,11 @@ pub enum ReportKind {
 
 /// Traits for prompts which can display output.
 pub trait PromptResponder {
+  /// Begins a new named scope.
   fn begin_scope(&mut self, name: &str, size: Option<usize>) -> Result<()>;
+  /// Ends the current scope.
   fn end_scope(&mut self) -> Result<()>;
+  /// Sends a response to the prompt.
   fn respond(
     &mut self,
     kind: RequestKind,
@@ -35,13 +38,16 @@ pub trait PromptResponder {
 
 /// Trait for prompts which can obtain input.
 pub trait PromptRequester: PromptResponder {
+  /// Returns true if the prompt is currently interactive.
   fn is_interactive(&self) -> bool;
+  /// Requests a response given a prompt message and optional variants.
   fn request(
     &mut self,
     kind: RequestKind,
     prompt: &str,
     variants: &'static [&'static str],
   ) -> Result<String>;
+  /// Reports an informative or error message to the prompt.
   fn report(&mut self, kind: ReportKind, msg: &str) -> Result<()>;
 }
 
