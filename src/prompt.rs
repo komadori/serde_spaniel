@@ -90,6 +90,14 @@ impl<P: PromptRequester> PromptRequester for &mut P {
 }
 
 /// Prompt decorator which allows `UserAction`s to be triggered in-band.
+///
+/// This prompt intercepts responses which begin with an exclamation mark.
+/// Entering the meta-commands `!cancel`, `!undo`, and `!restart` as a response
+/// will cause the request to fail with the corresponding `UserAction`. The
+/// commands may be abbreviated to single letters. The undo and restart
+/// commands may be followed by a number otherwise `Undo(1)` and `Restart(0)`
+/// is implied. Responses that actually begin with an exclamation mark can be
+/// escaped by doubling the exclamation mark.
 pub struct MetaCommandPrompt<P> {
   inner: P,
 }
@@ -125,11 +133,11 @@ impl<P: PromptResponder> PromptResponder for MetaCommandPrompt<P> {
 
 const HELP_TEXT: &[&str] = &[
   "Spaniel Meta-Command Reference: [optional] <argument>",
-  "  !!              - Escape respnses beginning with an exclaimation mark",
+  "  !!              - Escape responses beginning with an exclamation mark",
   "  !c[ancel]       - Cancel deserialisation",
   "  !u[ndo][<n>]    - Undo the previous or the last <n> responses",
   "  !r[estart][<n>] - Restart from the beginning or from the <n>th response",
-  "  !r[elp]         - This message",
+  "  !h[elp]         - This message",
 ];
 
 impl<P: PromptRequester> PromptRequester for MetaCommandPrompt<P> {
@@ -210,6 +218,12 @@ enum ReplayState {
 }
 
 /// Prompt decorator which logs responses and can replay them.
+///
+/// This prompt is used to facilitate undo and restart operations while
+/// interactively deserialising. The deserialiser itself cannot be stepped
+/// backwards once a response has been submitted. It's necessary to start the
+/// deserialiser again, but the `ReplayPrompt` can quickly bring it up to the
+/// correct point by replaying its log.
 pub struct ReplayPrompt<P> {
   inner: P,
   log: Vec<String>,
@@ -225,16 +239,19 @@ impl<P> ReplayPrompt<P> {
     }
   }
 
+  /// Clear log and disable recording.
   pub fn reset(&mut self) {
     self.log.clear();
     self.state = ReplayState::Disabled;
   }
 
+  /// Start recording responses.
   pub fn record(&mut self) {
     self.log.clear();
     self.state = ReplayState::Recording;
   }
 
+  /// Replay log and continue recording new responses.
   pub fn replay(&mut self) -> Result<()> {
     if let ReplayState::Recording = self.state {
       let old_log = std::mem::replace(&mut self.log, Vec::new());
@@ -245,11 +262,13 @@ impl<P> ReplayPrompt<P> {
     }
   }
 
+  /// Remove the last n responses from the log.
   pub fn undo(&mut self, n: usize) {
     let len = self.log.len();
     self.log.truncate(len - std::cmp::min(len, n));
   }
 
+  /// Truncate the log to the first nth responses in the log.
   pub fn restart_from(&mut self, n: usize) {
     self.log.truncate(n);
   }
