@@ -10,7 +10,7 @@ capture data interactively from users.
 
 ```toml
 [dependencies]
-serde_spaniel = "0.1"
+serde_spaniel = "0.2"
 ```
 
 ## Using Spaniel
