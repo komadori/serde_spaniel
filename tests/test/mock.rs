@@ -123,7 +123,7 @@ impl<I: ExactSizeIterator<Item = &'static str>> PromptRequester
       }
       None => {
         println!("request({:?}, {:?}, {:?}) failed", kind, prompt, variants);
-        Err(Error::IOError("Out of responses".to_string()))
+        Err(Error::IoError("Out of responses".to_string()))
       }
     }
   }

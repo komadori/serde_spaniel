@@ -57,7 +57,7 @@ fn lift_result<T, E: std::error::Error>(
 ) -> Result<T> {
   match value {
     Ok(v) => Ok(v),
-    Err(e) => Err(Error::IOError(e.to_string())),
+    Err(e) => Err(Error::IoError(e.to_string())),
   }
 }
 

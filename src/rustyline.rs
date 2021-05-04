@@ -195,7 +195,7 @@ impl<T: BorrowMut<Editor<H>>, H: SpanielHelper> PromptRequester
       Err(rustyline::error::ReadlineError::Interrupted) => {
         Err(Error::UserAction(UserAction::Cancel))
       }
-      Err(e) => Err(Error::IOError(e.to_string())),
+      Err(e) => Err(Error::IoError(e.to_string())),
     }
   }
 

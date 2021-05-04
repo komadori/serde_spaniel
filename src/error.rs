@@ -20,7 +20,7 @@ pub enum UserAction {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Error {
   SerdeError(String),
-  IOError(String),
+  IoError(String),
   UserAction(UserAction),
   BadResponse,
   CannotReplay,
@@ -42,7 +42,7 @@ impl Display for Error {
   fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
     match self {
       Error::SerdeError(msg) => write!(fmt, "Serde: {}", msg),
-      Error::IOError(msg) => write!(fmt, "I/O: {}", msg),
+      Error::IoError(msg) => write!(fmt, "I/O: {}", msg),
       Error::UserAction(action) => write!(fmt, "UserAction: {:?}", action),
       Error::BadResponse => write!(fmt, "Bad Response"),
       Error::CannotReplay => write!(fmt, "Cannot Replay"),
