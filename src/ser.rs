@@ -137,7 +137,7 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
   }
 
   fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
-    self.begin_scope("seq", len, ScopeLimit::Explicit)?;
+    self.begin_scope("seq", len.map(|x| x + 1), ScopeLimit::Explicit)?;
     Ok(Seq::new(self))
   }
 
@@ -167,8 +167,8 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
     Ok(self)
   }
 
-  fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-    self.begin_scope("map", None, ScopeLimit::Explicit)?;
+  fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
+    self.begin_scope("map", len.map(|x| x + 1), ScopeLimit::Explicit)?;
     Ok(Map::new(self))
   }
 
