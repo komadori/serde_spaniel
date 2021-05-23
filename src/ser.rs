@@ -263,7 +263,7 @@ impl<'a, P: PromptResponder> ser::SerializeTuple for Tuple<'a, P> {
     T: ?Sized + Serialize,
   {
     self.ser.begin_scope(
-      &format!("[{}..{}]", self.index, self.len),
+      &format!("[{}/{}]", self.index + 1, self.len),
       None,
       ScopeLimit::Explicit,
     )?;

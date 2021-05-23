@@ -479,7 +479,7 @@ impl<'de, 'a, P: PromptRequester> SeqAccess<'de> for Tuple<'a, P> {
     T: DeserializeSeed<'de>,
   {
     self.de.begin_scope(
-      &format!("[{}..{}]", self.index, self.len),
+      &format!("[{}/{}]", self.index + 1, self.len),
       None,
       ScopeLimit::Implicit,
     )?;
