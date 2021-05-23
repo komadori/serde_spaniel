@@ -8,9 +8,10 @@ fn test_de<'a, G: Golden>()
 where
   G::V: Deserialize<'a>,
 {
-  let value: G::V =
-    from_bare_prompt(MockPrompt::new(G::responses(false).into_iter())).unwrap();
-  assert_eq!(value, <G as Golden>::value());
+  let mut prompt = MockPrompt::new(G::responses(false).into_iter());
+  let value: G::V = from_bare_prompt(&mut prompt).unwrap();
+  assert_eq!(value, G::value());
+  assert_eq!(prompt.scope_names(), G::scope_names())
 }
 
 #[test]

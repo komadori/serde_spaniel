@@ -373,7 +373,12 @@ impl<'de: 'a, 'a, P: PromptRequester> VariantAccess<'de>
   where
     V: Visitor<'de>,
   {
-    de::Deserializer::deserialize_tuple(self.de, len, visitor)
+    self
+      .de
+      .begin_scope(self.variant, Some(len), ScopeLimit::Explicit)?;
+    let res = visitor.visit_seq(Tuple::new(self.de, len))?;
+    self.de.end_scope()?;
+    Ok(res)
   }
 
   fn struct_variant<V>(

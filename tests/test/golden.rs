@@ -6,6 +6,7 @@ pub trait Golden {
   type V: Debug + PartialEq;
   fn value() -> Self::V;
   fn responses(include_unit_variants: bool) -> Vec<&'static str>;
+  fn scope_names() -> Vec<&'static str>;
 }
 
 pub enum StructOfPrimsCase {}
@@ -74,6 +75,28 @@ impl Golden for StructOfPrimsCase {
       "3.141592653589793",
     ]
   }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "StructOfPrims",
+      "boolean",
+      "character",
+      "int8",
+      "int16",
+      "int32",
+      "int64",
+      "int128",
+      "intptr",
+      "uint8",
+      "uint16",
+      "uint32",
+      "uint64",
+      "uint128",
+      "uintptr",
+      "single",
+      "double",
+    ]
+  }
 }
 
 pub enum StructOfSeqsCase {}
@@ -98,6 +121,26 @@ impl Golden for StructOfSeqsCase {
     vec![
       "yes", "60", "yes", "3600", "no", "yes", "no", "yes", "yes", "yes", "no",
       "no",
+    ]
+  }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "StructOfSeqs",
+      "ints",
+      "seq",
+      "[0]",
+      "[1]",
+      "[2]",
+      "option_units",
+      "seq",
+      "[0]",
+      "option",
+      "[1]",
+      "option",
+      "[2]",
+      "option",
+      "[3]",
     ]
   }
 }
@@ -128,6 +171,13 @@ impl Golden for TupleOfOptionsCase {
       "no", "yes", "Tinker", "yes", "no", "yes", "yes", "Tailor", "no",
     ]
   }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "tuple", "[1/5]", "option", "[2/5]", "option", "[3/5]", "option",
+      "option", "[4/5]", "option", "option", "[5/5]", "option",
+    ]
+  }
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -154,6 +204,17 @@ impl Golden for TupleOfUnitsCase {
       vec![]
     }
   }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "tuple",
+      "[1/3]",
+      "[2/3]",
+      "NewtypeUnit",
+      "[3/3]",
+      "EnumUnit",
+    ]
+  }
 }
 
 pub enum SeqOfSeqsCase {}
@@ -169,6 +230,13 @@ impl Golden for SeqOfSeqsCase {
     vec![
       "yes", "yes", "H", "yes", "e", "yes", "l", "yes", "l", "yes", "o", "no",
       "yes", "no", "yes", "yes", "Y", "yes", "O", "yes", "U", "no", "no",
+    ]
+  }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "seq", "[0]", "seq", "[0]", "[1]", "[2]", "[3]", "[4]", "[5]", "[1]",
+      "seq", "[0]", "[2]", "seq", "[0]", "[1]", "[2]", "[3]", "[3]",
     ]
   }
 }
@@ -192,7 +260,7 @@ pub enum Fruit {
 pub enum Quantity {
   Single,
   Boxes(u32, BoxSize),
-  Weight(Kilos),
+  Weight { kg: Kilos },
 }
 
 impl Golden for MapOfEnumsAndNewtypesCase {
@@ -204,7 +272,7 @@ impl Golden for MapOfEnumsAndNewtypesCase {
     golden.insert(Fruit::Orange, Quantity::Boxes(1000, BoxSize(12)));
     golden.insert(
       Fruit::Other("Banana".to_string()),
-      Quantity::Weight(Kilos(50)),
+      Quantity::Weight { kg: Kilos(50) },
     );
     golden
   }
@@ -213,6 +281,14 @@ impl Golden for MapOfEnumsAndNewtypesCase {
     vec![
       "yes", "Apple", "Single", "yes", "Orange", "Boxes", "1000", "12", "yes",
       "Other", "Banana", "Weight", "50", "no",
+    ]
+  }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec![
+      "map", "[0]", "Fruit", "Quantity", "[1]", "Fruit", "Quantity", "Boxes",
+      "[1/2]", "[2/2]", "BoxSize", "[2]", "Fruit", "Quantity", "Weight", "kg",
+      "Kilos", "[3]",
     ]
   }
 }

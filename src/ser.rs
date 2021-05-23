@@ -38,8 +38,8 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
 
   type SerializeSeq = Seq<'a, P>;
   type SerializeTuple = Tuple<'a, P>;
-  type SerializeTupleStruct = Self;
-  type SerializeTupleVariant = Self;
+  type SerializeTupleStruct = Tuple<'a, P>;
+  type SerializeTupleVariant = Tuple<'a, P>;
   type SerializeMap = Map<'a, P>;
   type SerializeStruct = Self;
   type SerializeStructVariant = Self;
@@ -152,7 +152,7 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
     len: usize,
   ) -> Result<Self::SerializeTupleStruct> {
     self.begin_scope(name, Some(len), ScopeLimit::Explicit)?;
-    Ok(self)
+    Ok(Tuple::new(self, len))
   }
 
   fn serialize_tuple_variant(
@@ -160,11 +160,12 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
     name: &'static str,
     _variant_index: u32,
     variant: &'static str,
-    _len: usize,
+    len: usize,
   ) -> Result<Self::SerializeTupleVariant> {
     self.begin_scope(name, None, ScopeLimit::Explicit)?;
     self.respond(RequestKind::Datum, "variant", variant)?;
-    Ok(self)
+    self.begin_scope(variant, Some(len), ScopeLimit::Explicit)?;
+    Ok(Tuple::new(self, len))
   }
 
   fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
@@ -186,10 +187,11 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
     name: &'static str,
     _variant_index: u32,
     variant: &'static str,
-    _len: usize,
+    len: usize,
   ) -> Result<Self::SerializeStructVariant> {
     self.begin_scope(name, None, ScopeLimit::Explicit)?;
     self.respond(RequestKind::Datum, "variant", variant)?;
+    self.begin_scope(variant, Some(len), ScopeLimit::Explicit)?;
     Ok(self)
   }
 }
@@ -277,9 +279,7 @@ impl<'a, P: PromptResponder> ser::SerializeTuple for Tuple<'a, P> {
   }
 }
 
-impl<'a, P: PromptResponder> ser::SerializeTupleStruct
-  for &'a mut Serializer<P>
-{
+impl<'a, P: PromptResponder> ser::SerializeTupleStruct for Tuple<'a, P> {
   type Ok = ();
   type Error = Error;
 
@@ -287,17 +287,16 @@ impl<'a, P: PromptResponder> ser::SerializeTupleStruct
   where
     T: ?Sized + Serialize,
   {
-    value.serialize(&mut **self)
+    use serde::ser::SerializeTuple;
+    self.serialize_element(value)
   }
 
   fn end(self) -> Result<()> {
-    self.end_scope()
+    self.ser.end_scope()
   }
 }
 
-impl<'a, P: PromptResponder> ser::SerializeTupleVariant
-  for &'a mut Serializer<P>
-{
+impl<'a, P: PromptResponder> ser::SerializeTupleVariant for Tuple<'a, P> {
   type Ok = ();
   type Error = Error;
 
@@ -305,11 +304,13 @@ impl<'a, P: PromptResponder> ser::SerializeTupleVariant
   where
     T: ?Sized + Serialize,
   {
-    value.serialize(&mut **self)
+    use serde::ser::SerializeTuple;
+    self.serialize_element(value)
   }
 
   fn end(self) -> Result<()> {
-    self.end_scope()
+    self.ser.end_scope()?;
+    self.ser.end_scope()
   }
 }
 
@@ -402,6 +403,7 @@ impl<'a, P: PromptResponder> ser::SerializeStructVariant
   }
 
   fn end(self) -> Result<()> {
+    self.end_scope()?;
     self.end_scope()
   }
 }

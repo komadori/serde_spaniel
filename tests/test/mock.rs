@@ -48,6 +48,17 @@ impl<I: ExactSizeIterator<Item = &'static str>> MockPrompt<I> {
     }
     rs
   }
+
+  pub fn scope_names(&self) -> Vec<String> {
+    let mut ns = Vec::new();
+    for entry in self.log.iter() {
+      match entry {
+        LogEntry::BeginScope(str, _) => ns.push(str.clone()),
+        _ => {}
+      }
+    }
+    ns
+  }
 }
 
 impl<I: ExactSizeIterator<Item = &'static str>> Drop for MockPrompt<I> {

@@ -9,9 +9,10 @@ fn test_ser<G: Golden>()
 where
   G::V: Serialize,
 {
-  let mut mock = MockPrompt::new(empty());
-  to_bare_prompt(&G::value(), &mut mock).unwrap();
-  assert_eq!(mock.responses(), G::responses(true))
+  let mut prompt = MockPrompt::new(empty());
+  to_bare_prompt(&G::value(), &mut prompt).unwrap();
+  assert_eq!(prompt.responses(), G::responses(true));
+  assert_eq!(prompt.scope_names(), G::scope_names())
 }
 
 #[test]
