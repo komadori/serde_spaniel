@@ -58,3 +58,8 @@ fn bad_u32_interactive() {
     from_bare_prompt(MockPrompt::new(vec).with_interactive()).unwrap();
   assert_eq!(value, 123)
 }
+
+#[test]
+fn bytes() {
+  test_de::<golden::BytesCase>()
+}

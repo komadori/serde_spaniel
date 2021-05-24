@@ -44,3 +44,8 @@ fn seq_of_seqs() {
 fn map_of_enums_and_newtypes() {
   test_ser::<golden::MapOfEnumsAndNewtypesCase>()
 }
+
+#[test]
+fn bytes() {
+  test_ser::<golden::BytesCase>()
+}

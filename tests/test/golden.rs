@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_bytes::ByteBuf;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 
@@ -290,5 +291,27 @@ impl Golden for MapOfEnumsAndNewtypesCase {
       "[1/2]", "[2/2]", "BoxSize", "[2]", "Fruit", "Quantity", "Weight", "kg",
       "Kilos", "[3]",
     ]
+  }
+}
+
+pub enum BytesCase {}
+
+impl Golden for BytesCase {
+  type V = ByteBuf;
+
+  fn value() -> Self::V {
+    let mut vec = ByteBuf::new();
+    vec.push(65);
+    vec.push(66);
+    vec.push(67);
+    vec
+  }
+
+  fn responses(_: bool) -> Vec<&'static str> {
+    vec!["yes", "65", "yes", "66", "yes", "67", "no"]
+  }
+
+  fn scope_names() -> Vec<&'static str> {
+    vec!["bytes"]
   }
 }

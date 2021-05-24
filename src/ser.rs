@@ -65,11 +65,13 @@ impl<'a, P: PromptResponder> ser::Serializer for &'a mut Serializer<P> {
   }
 
   fn serialize_bytes(self, v: &[u8]) -> Result<()> {
+    self.begin_scope("bytes", None, ScopeLimit::Explicit)?;
     for byte in v {
       self.respond(RequestKind::Question, "Add byte?", "yes")?;
       self.respond(RequestKind::Datum, "u8", &byte.to_string())?;
     }
-    self.respond(RequestKind::Question, "Add byte?", "no")
+    self.respond(RequestKind::Question, "Add byte?", "no")?;
+    self.end_scope()
   }
 
   fn serialize_none(self) -> Result<()> {

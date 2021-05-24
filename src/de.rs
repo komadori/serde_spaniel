@@ -124,6 +124,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
     V: Visitor<'de>,
   {
     let mut buf = Vec::<u8>::new();
+    self.begin_scope("bytes", None, ScopeLimit::Explicit)?;
     while self.ask_yes_no("Add byte?")? {
       loop {
         let s = self.request(RequestKind::Datum, "u8", u8i8::U8_VARIANTS)?;
@@ -141,6 +142,7 @@ impl<'de, 'a, P: PromptRequester> de::Deserializer<'de>
         }
       }
     }
+    self.end_scope()?;
     visitor.visit_byte_buf(buf)
   }
 
