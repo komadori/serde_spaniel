@@ -17,7 +17,7 @@ u8i8_variants = []
 
 [dependencies]
 serde = "1.0"
-rustyline = { version = "8.0", optional = true}
+rustyline = { version = "8.2", optional = true}
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
