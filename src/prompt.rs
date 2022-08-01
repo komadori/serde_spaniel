@@ -160,7 +160,7 @@ impl<P: PromptRequester> PromptRequester for MetaCommandPrompt<P> {
         s.replace_range(0..1, "");
         return Ok(s);
       }
-      let prefix = s.trim_end_matches(|c: char| c.is_digit(10));
+      let prefix = s.trim_end_matches(|c: char| c.is_ascii_digit());
       let suffix_str = &s[prefix.len()..];
       let suffix = if suffix_str.is_empty() {
         None
@@ -254,7 +254,7 @@ impl<P> ReplayPrompt<P> {
   /// Replay log and continue recording new responses.
   pub fn replay(&mut self) -> Result<()> {
     if let ReplayState::Recording = self.state {
-      let old_log = std::mem::replace(&mut self.log, Vec::new());
+      let old_log = std::mem::take(&mut self.log);
       self.state = ReplayState::Replaying(old_log.into_iter());
       Ok(())
     } else {
