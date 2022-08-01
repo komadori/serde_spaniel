@@ -13,7 +13,7 @@ pub struct ReadWritePrompt<R, W> {
   level: usize,
 }
 
-impl<'a> ReadWritePrompt<Stdin, Stdout> {
+impl ReadWritePrompt<Stdin, Stdout> {
   pub fn new_stdio() -> Self {
     ReadWritePrompt {
       read: stdin(),
@@ -61,7 +61,7 @@ fn lift_result<T, E: std::error::Error>(
   }
 }
 
-impl<'a, R, W: Write> PromptResponder for ReadWritePrompt<R, W> {
+impl<R, W: Write> PromptResponder for ReadWritePrompt<R, W> {
   fn begin_scope(&mut self, name: &str, _size: Option<usize>) -> Result<()> {
     lift_result(writeln!(
       self.write,
@@ -103,7 +103,7 @@ impl<'a, R, W: Write> PromptResponder for ReadWritePrompt<R, W> {
   }
 }
 
-impl<'a, R: BufRead, W: Write> PromptRequester for ReadWritePrompt<R, W> {
+impl<R: BufRead, W: Write> PromptRequester for ReadWritePrompt<R, W> {
   fn is_interactive(&self) -> bool {
     self.is_interactive
   }
