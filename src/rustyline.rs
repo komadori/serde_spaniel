@@ -94,16 +94,14 @@ pub struct RustyLinePrompt<T: BorrowMut<Editor<H>>, H: SpanielHelper> {
 
 impl RustyLinePrompt<Editor<SimpleHelper>, SimpleHelper> {
   /// Constructs a new `RustyLinePrompt` which owns a stock editor.
-  pub fn new() -> Self {
-    let mut editor = Editor::new();
-    editor.set_helper(Some(SimpleHelper::new()));
-    Self::with_editor(editor)
-  }
-}
-
-impl Default for RustyLinePrompt<Editor<SimpleHelper>, SimpleHelper> {
-  fn default() -> Self {
-    Self::new()
+  pub fn new() -> Result<Self> {
+    match Editor::new() {
+      Ok(mut editor) => {
+        editor.set_helper(Some(SimpleHelper::new()));
+        Ok(Self::with_editor(editor))
+      }
+      Err(err) => Err(Error::IoError(err.to_string())),
+    }
   }
 }
 
