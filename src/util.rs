@@ -106,7 +106,7 @@ pub fn from_console<'de, T: Deserialize<'de>>() -> Result<T> {
 
   #[cfg(all(not(feature = "rustyline"), not(feature = "stdio")))]
   {
-    Err(Error::IOError("No console support!"))
+    Err(Error::IoError("No console support!".to_string()))
   }
 }
 

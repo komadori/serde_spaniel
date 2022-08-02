@@ -5,6 +5,9 @@
 ### Changed
 - Updated RustyLine dependency to 10.0.
 
+### Fixed
+- Fixed building without default features.
+
 ## Serde Spaniel 0.3.0 (2021-05-24)
 
 ### Added
