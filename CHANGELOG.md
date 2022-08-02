@@ -1,5 +1,10 @@
 # Changelog
 
+## Serde Spaniel 0.4.0 (2022-08-02)
+
+### Changed
+- Updated RustyLine dependency to 10.0.
+
 ## Serde Spaniel 0.3.0 (2021-05-24)
 
 ### Added

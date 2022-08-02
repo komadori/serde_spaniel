@@ -1,16 +1,20 @@
 Spaniel Interactive Deserialiser for Serde
 ==========================================
 
-This crate is a Rust library which uses the Serde serialisation framework to
-capture data interactively from users.
 
-[Serde]: https://github.com/serde-rs/serde
+[![crates.io](https://img.shields.io/crates/v/serde_spaniel.svg)](https://crates.io/crates/serde_spaniel)
+[![docs](https://docs.rs/serde_spaniel/badge.svg)](https://docs.rs/serde_spaniel)
+
+This crate is a Rust library which uses the [Serde][serde] serialisation
+framework to capture data interactively from users.
+
+[serde]: https://github.com/serde-rs/serde
 
 ## Dependency
 
 ```toml
 [dependencies]
-serde_spaniel = "0.3"
+serde_spaniel = "0.4"
 ```
 
 ## Using Spaniel
@@ -42,3 +46,18 @@ seq {
 }
 Accept value?: y
 ```
+
+## Licence
+
+Dual-licensed under either of
+
+- Apache Licence, Version 2.0, ([LICENCE-APACHE](/LICENCE-APACHE) or https://www.apache.org/licenses/LICENSE-2.0)
+- MIT licence ([LICENCE-MIT](/LICENCE-MIT) or https://opensource.org/licenses/MIT)
+
+at your option.
+
+## Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 licence, shall
+be dual-licensed as above, without any additional terms or conditions.
